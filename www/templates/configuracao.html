@@ -1,0 +1,15 @@
+<ion-view view-title="Configurações">
+    <ion-content>
+      
+        <br>IP configurado: {{configIp}}:{{configPorta}}
+        <form name="form"></form>
+          <ion-list>
+            <ion-item>Ip:(ex: 192.168.0.1) <input type="text" ng-model="$parent._ip" type="text"></ion-item>
+            <ion-item>Porta: (ex: 4210) <input type="text" ng-model="$parent._porta" ></ion-item>
+          </ion-list>
+          
+          <button ng-click="salvarIp(_ip, _porta)"  class="button cor-barra-padrao button-block icon-left ion-ios-contact">Salvar Ip</button>
+        </form>
+    </ion-content>
+  </ion-view>
+  
