@@ -1,16 +1,9 @@
-// Ionic Starter App
 
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
-// 'starter.controllers' is found in controllers.js
 var app = angular.module('starter', ["ionic", "firebase"]);
 
 app.run(function($ionicPlatform) {
   
   $ionicPlatform.ready(function() {
-    // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-    // for form inputs)
 
     if (window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
@@ -18,7 +11,6 @@ app.run(function($ionicPlatform) {
 
     }
     if (window.StatusBar) {
-      // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
   });
@@ -68,6 +60,7 @@ app.controller("HomeCtrl", function($scope, $firebaseObject, $firebaseAuth, $roo
   var lampRef = db.ref('Led');
   var valUdp = 2;
 
+  //pega o ip que eu informar na configuração, esse ip vem do arduino/NodeMcu.
   _ip = $rootScope.configIp;
 
   // Registra as funções que atualizam os gráficos e dados atuais da telemetria
@@ -75,7 +68,7 @@ app.controller("HomeCtrl", function($scope, $firebaseObject, $firebaseAuth, $roo
   umidRef.on('value', onNewData('currentUmid', 'umidLineChart' , 'Umidade', '%'));
 
 
-  // Registrar função ao alterar valor da lampada
+  // Registrar função ao alterar valor da lampada (Experimental)
   var currentLampValue = false;
   lampRef.on('value', function(snapshot){
     var value = snapshot.val();
@@ -89,18 +82,16 @@ app.controller("HomeCtrl", function($scope, $firebaseObject, $firebaseAuth, $roo
   });
 
 
-  // Registrar função de click no botão de lampada
+  // Registrar função de click no botão de lampada (Experimental)
   var btnLamp = document.getElementById('btn-lamp');
   btnLamp.addEventListener('click', function(evt){
     lampRef.set(!currentLampValue);
     if(!currentLampValue == true){
       valUdp = 1;
-      // alert("clicou no botao como true currentLampValue: " + currentLampValue + " valUdp "+ valUdp);
-      
+    
     } else if(!currentLampValue == false){
       valUdp = 2;
-      // alert("clicou no botao como false currentLampValue: " + currentLampValue + " valUdp "+ valUdp);
-      
+
     }
 
 
@@ -131,12 +122,8 @@ function onNewData(currentValueEl, chartEl, label, metric){
 
 
 
-//codigo da porta udp
-
-
+//Função UDP, essa é a parte mais importante, aqui é feito o envio de dados para uma porta especifica via protocolo UDP
    $scope.sendcmd = function sendcmd(cmd) {
-    //  alert("chamou a função cmd: " + cmd + " e porta: "+ valUdp);
-    //  alert("Ip Usado: " + $rootScope.configIp + ":" + $rootScope.configPorta);
      if($rootScope.configIp==null ){
       alert("Atenção um Ip  devem se configurado");
      }
@@ -144,32 +131,26 @@ function onNewData(currentValueEl, chartEl, label, metric){
       alert("Atenção uma  porta deve ser configurada");
      }
      
-    //  var address = "192.168.43.122";
+
      var address = $rootScope.configIp;
-      // var port = 4210;
      var port = $rootScope.configPorta;
      var data = new ArrayBuffer(cmd);
    
      chrome.sockets.udp.create({}, function (socketInfo) {
-      // alert("entrou no create socketInfo " + socketInfo + " address "+ address);
+
        var socketId = socketInfo.socketId;
        chrome.sockets.udp.bind( socketId, "0.0.0.0", 49287, function (result) {
-        // alert("entrou no bind result " + result);
          chrome.sockets.udp.getInfo( socketId, function(result){
-          // alert("entrou no getInfo  " + getInfo + " com result " + result);
            console.log(result);
          });
    
          if(result < 0) {
-          //  alert("ocorreu um erro: " + chrome.runtime.lastError.message);
+
          } else {
            chrome.sockets.udp.send( socketId, data, address, port, function (sendInfo) {
-            // alert("entrou no send  " + sendInfo );
              if (sendInfo.resultCode < 0) {
-              // alert("erro no send sendInfo.resultCode " + sendInfo.resultCode + " e  chrome.runtime.lastError.message: " + chrome.runtime.lastError.message );
                console.log(chrome.runtime.lastError.message);
              } else {
-              // alert("sucesso no envio " + sendInfo);
                console.log(sendInfo);
              }
            });
